@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    container_name: KVs
+    volumes:
+      - .:/app
+    # コンテナを起動し続けるための設定
+    tty: true
+    stdin_open: true
+    working_dir: /app
