@@ -1,4 +1,4 @@
-#ifdef TEST_BUILD
+#ifdef NOSTATIC
     #define STATIC
 #else
     #define STATIC static
