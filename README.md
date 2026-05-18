@@ -101,11 +101,14 @@
 
 # 開発用メモ
 ## Makefile
-| **実行コマンド** | **モード** | **`-DNDEBUG`** | **Valgrind** | **`-DNOSTATIC`**（`test`用） |
-| :--- | :--- | :--- | :--- | :--- |
-| `make` | デバッグ（デフォルト） | なし | `-`（※実行なし） | なし |
-| `make MODE=prod` | 本番想定確認 | あり | `-`（※実行なし） | なし |
-| `make MODE=release` | リリース | あり | `-`（※実行なし） | なし |
-| `make test` | デバッグテスト | なし | 有効 | あり |
-| `make test MODE=prod` | 本番想定テスト | あり | 有効 | あり |
-| `make test MODE=release` | リリーステスト | あり | 無効 | あり |
+| **実行コマンド** | **モード** | **追加されるマクロ** | **実行される動作** |
+| :--- | :--- | :--- | :--- |
+| `make` (または `make all`) | デバッグモード (デフォルト) | なし | `bin/kvstore` をビルド |
+| `make release` | リリース | `-DNDEBUG` | `bin/kvstore` をビルド |
+| `make prod` | 本番想定動作確認 | `-DNDEBUG` | `bin/kvstore` をビルド |
+| `make test` | `test`モード | `-DNOSTATIC` | `test/test_runner` をビルド・実行し、`.o` を削除 |
+
+## Valgrind
+```bash
+valgrind --leak-check=full --track-origins=yes
+```
