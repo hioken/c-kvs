@@ -92,6 +92,7 @@ valgrind --leak-check=full --track-origins=yes
 1. READMEの編集
 2. `cmd_string.c`, `.h` 及び `test_cmd_string.c` を作成
 3. `get`, `set` を上記に移し、テストを行えるように変更
+4. Makefileを修正して、動作確認
 
 ### 5. データ型追加
 `string` と同じフォーマットで `Hash`, `List` 追加

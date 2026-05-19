@@ -29,25 +29,19 @@ struct Node {
     } value;
 };
 
-int setup(void);
-Node* resolve_set_collision(Node*);
-Node* resolve_get_collision(Node*, char []);
-uint32_t hash_fnv1a(const char*);
+STATIC uint32_t hash_fnv1a(const char*);
+STATIC Node* scan_chain(char []);
 
 STATIC Node pool[MAX_NODES];
 STATIC Node* hash_table[TABLE_SIZE] = { NULL };
 STATIC Node* free_head = &pool[0];
 
-Node* resolve_set_collision(*Node node){
+int setup(void) {
+    // poolのデフォルト値設定
     return 0;
-};
+}
 
-Node* resolve_get_collision(*Node node, char key[]){
-    return 0;
-};
-
-// 以下の関数はgeminiの丸写し
-uint32_t hash_fnv1a(const char *str) {
+STATIC uint32_t hash_fnv1a(const char *key) {
     uint32_t hash = 2166136261U; // FNVの32ビット用初期値
     const uint32_t fnv_prime = 16777619U; // FNVの32ビット用素数
 
@@ -56,4 +50,35 @@ uint32_t hash_fnv1a(const char *str) {
         hash *= fnv_prime;             // 素数を掛け算する
     }
     return hash;
+}
+
+STATIC Node* scan_chain(char key[]) {
+    while () {
+
+    }
+    if (1) {
+        return node*;
+    } else {
+        return NULL;
+    }
+};
+
+int kvs_string_set(char *argv[]) {
+    if (1) {
+        printf('success')
+        return 0;
+    } else {
+        // 例外処理
+        return 1;
+    }
+}
+
+int kvs_string_get(char *argv[]) {
+    if (1) {
+        printf('value')
+        return 0;
+    } else {
+        // 例外処理
+        return 1;
+    }
 }

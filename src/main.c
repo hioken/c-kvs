@@ -2,14 +2,14 @@
 #include <string.h>
 
 int input_line(void)
-int parse_input(char*);
+int parse_input(char* []);
 
 typedef struct {
     const char *cmd_name;
     void (*func)(void);
 } CommandTable;
 
-int main(void) {
+int main(int argc, char *argv[]) {
     // kvsのsetup呼び出し
     // ループ
       // if (input_line()) { エラー }
@@ -22,7 +22,7 @@ int input_line(void) {
     // if (parse_input(入力)) return 1;
 })
 
-int parse_input(char* input) {
+int parse_input(char *argv[]) {
     // int flg = 1;
     // 解析
     // static const CommandTable
