@@ -4,12 +4,14 @@
 int input_line(void);
 int parse_input(char*);
 
+#ifndef TESTMODE
 int main(void) {
     // kvsのsetup呼び出し
     // ループ
       // if (input_line()) { エラー }
     return 0;
 }
+#endif
 
 int input_line(void) {
     // 入力待ち

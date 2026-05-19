@@ -62,7 +62,7 @@
 ## Makefile
 | **実行コマンド** | **モード** | **追加されるマクロ** | **実行される動作** |
 | :--- | :--- | :--- | :--- |
-| `make test` | `test`モード | `-DNOSTATIC` | `test/test_runner` をビルド・実行し、`.o` を削除 |
+| `make test` | `test`モード | `-DTESTMODE` | `test/test_runner` をビルド・実行し、`.o` を削除 |
 | `make` (または `make all`) | デバッグモード (デフォルト) | なし | `bin/kvstore` をビルド |
 | `make prod` | 本番想定動作確認 | `-DNDEBUG` | `bin/kvstore` をビルド |
 | `make release` | リリース | `-DNDEBUG` | `bin/kvstore` をビルド |
@@ -133,7 +133,7 @@ valgrind --leak-check=full --track-origins=yes
 - parse_input(): 入力文字列をトークン（引数配列）に分解し、該当するkvsハンドラへ流す
 ### kvs.c: KVSコア・メモリ管理・ハンドラ一括実装
 - グローバル: `static` 変数として、実データプール、ハッシュテーブル、フリーリスト先頭ポインタの実体を定義（メモリの静的確保）
-  - テスト環境用にマクロ`NOSTATIC`を使用して分岐で`static`を外す
+  - テスト環境用にマクロ`TESTMODE`を使用して分岐で`static`を外す
 - setup(): 静的確保された実データプールのデフォルト値セット（フリーリストの初期の接続や初期値代入など）のみを実行
 - 各種ハンドラ: main.cから呼ばれる各コマンド（SET, GET, DEL等）の実装
   - *ポインタ操作*: 各ハンドラ内でフリーリストやチェインのnextポインタを直接操作する

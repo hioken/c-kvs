@@ -41,7 +41,7 @@ $(BINDIR) $(OBJDIR) $(TESTDIR):
 TEST_OBJS      := $(patsubst $(SRCDIR)/%.c,$(TESTDIR)/%.o,$(SRCS))
 TEST_CORE_OBJS := $(filter-out $(TESTDIR)/main.o,$(TEST_OBJS))
 
-test: CFLAGS += -DNOSTATIC -g
+test: CFLAGS += -DTESTMODE -g
 test: $(TEST_CORE_OBJS) $(TESTDIR)/test_main.o | $(TESTDIR)
 	$(CC) $(CFLAGS) $(INCDIR) $(TESTDIR)/test_main.o $(TEST_CORE_OBJS) -o $(TEST_TARGET)
 	rm -f $(TEST_CORE_OBJS) $(TESTDIR)/test_main.o

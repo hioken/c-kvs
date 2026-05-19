@@ -6,7 +6,7 @@
 #define TABLE_SIZE 1009
 #define KEY_SIZE 256
 #define VALUE_SIZE 768
-#ifdef NOSTATIC
+#ifdef TESTMODE
     #define STATIC
 #else
     #define STATIC static
