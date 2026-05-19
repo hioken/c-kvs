@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
-// #include <stdlib.h>
+#include "kvs.h"
 
 #define MAX_NODES 1000
 #define TABLE_SIZE 1009
@@ -21,7 +21,7 @@ typedef enum {
 typedef struct Node Node;
 struct Node {
     char key[KEY_SIZE];
-    DataType: type;
+    DataType type;
     Node* next;
     union {
         char string_val[VALUE_SIZE];
@@ -29,43 +29,43 @@ struct Node {
     } value;
 };
 
-STATIC uint32_t hash_fnv1a(const char*);
-STATIC Node* scan_chain(char []);
-
 STATIC Node pool[MAX_NODES];
 STATIC Node* hash_table[TABLE_SIZE] = { NULL };
 STATIC Node* free_head = &pool[0];
+
+STATIC uint32_t hash_fnv1a(const char*);
+STATIC Node* scan_chain(const char*);
 
 int setup(void) {
     // poolのデフォルト値設定
     return 0;
 }
 
-STATIC uint32_t hash_fnv1a(const char *key) {
+STATIC uint32_t hash_fnv1a(const char* key) {
     uint32_t hash = 2166136261U; // FNVの32ビット用初期値
     const uint32_t fnv_prime = 16777619U; // FNVの32ビット用素数
 
-    while (*str) {
-        hash ^= (unsigned char)*str++; // 文字をXORで混ぜる
+    while (*key) {
+        hash ^= (unsigned char)*key++; // 文字をXORで混ぜる
         hash *= fnv_prime;             // 素数を掛け算する
     }
     return hash;
 }
 
-STATIC Node* scan_chain(char key[]) {
+STATIC Node* scan_chain(const char* key) {
     while () {
 
     }
     if (1) {
-        return node*;
+        return node_p;
     } else {
         return NULL;
     }
 };
 
-int kvs_string_set(char *argv[]) {
+int kvs_string_get(const char* args) {
     if (1) {
-        printf('success')
+        printf("value");
         return 0;
     } else {
         // 例外処理
@@ -73,9 +73,9 @@ int kvs_string_set(char *argv[]) {
     }
 }
 
-int kvs_string_get(char *argv[]) {
+int kvs_string_set(const char* args) {
     if (1) {
-        printf('value')
+        printf("success");
         return 0;
     } else {
         // 例外処理

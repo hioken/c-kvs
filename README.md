@@ -143,3 +143,5 @@ valgrind --leak-check=full --track-origins=yes
 - 各種例外処理関数
 ### sysinfo.c / sysinfo.h: システム情報取得
 - OS全体のメモリ使用量を監視するためのシステム情報取得関数
+
+    
