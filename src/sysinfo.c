@@ -1,5 +1,5 @@
 /*#include <stdio.h>
-#include <src/sysinfo.h>
+#include <sys/sysinfo.h>
 
 #define LOG_DEBUG(fmt, ...) do { \
     struct sysinfo si; \
