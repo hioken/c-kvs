@@ -29,6 +29,7 @@ struct Node {
     } value;
 };
 
+int setup(void);
 uint32_t hash_fnv1a(const char*);
 
 STATIC Node pool[MAX_NODES];
