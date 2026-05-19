@@ -75,10 +75,9 @@ valgrind --leak-check=full --track-origins=yes
 ## 開発工程・ロードマップ
 
 ### 1. デバッグ情報もなしの最低限のget, set作成
-1. `string` の `get`, `set` 、衝突解決の `set` のみを想定したひな型の作成
-2. `input_line()` に直接引数を渡す形で、`get` と `set` のテストを書く
-3. 衝突解決を追加
-4. ひな型を埋める・動作テスト
+1. `string` の `get`, `set`のみを想定したひな型の作成
+2. `input_line()` に直接引数を渡す形で、`get`, `set`, 衝突解決の `set` のテストを書く
+3. ひな型を埋める・動作テスト
 
 ### 2. デバッグ、例外処理追加
 1. ディレクトリの () 部分のファイル (`error.c`, `error.h`, `sysinfo.c`, `sysinfo.h`) を作成

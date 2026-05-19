@@ -30,11 +30,21 @@ struct Node {
 };
 
 int setup(void);
+Node* resolve_set_collision(Node*);
+Node* resolve_get_collision(Node*, char []);
 uint32_t hash_fnv1a(const char*);
 
 STATIC Node pool[MAX_NODES];
 STATIC Node* hash_table[TABLE_SIZE] = { NULL };
 STATIC Node* free_head = &pool[0];
+
+Node* resolve_set_collision(*Node node){
+    return 0;
+};
+
+Node* resolve_get_collision(*Node node, char key[]){
+    return 0;
+};
 
 // 以下の関数はgeminiの丸写し
 uint32_t hash_fnv1a(const char *str) {
