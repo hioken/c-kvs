@@ -96,8 +96,9 @@ valgrind --leak-check=full --track-origins=yes
 
 ### 5. データ型追加
 `string` と同じフォーマットで `Hash`, `List` 追加
-1. `Hash` の `HSET`, `HGET` のテスト、実装
+1. `Hash` の `HSET`, `HGET` のテスト、実装(valueの要素数が多い場合、分割で返す仕組み)
 2. `List` の `L/RPUSH`, `LINDEX` のテスト、実装
+3. `String`のテスト
 
 ### 6. 一括機能追加
 1. `String` に `MGET`, `MSET` 追加

@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdint.h>
-#include "kvs.h"
+#include "./kvs.h"
 
 #define MAX_NODES 1000
 #define TABLE_SIZE 1009
-#define KEY_SIZE 256
 #define VALUE_SIZE 768
+#define KEY_SIZE 256
 #ifdef TESTMODE
     #define STATIC
 #else
@@ -63,7 +63,7 @@ STATIC Node* scan_chain(const char* key) {
     }
 };
 
-int kvs_string_get(const char* args) {
+int kvs_string_get(Context*) {
     if (1) {
         printf("value");
         return 0;
@@ -73,7 +73,7 @@ int kvs_string_get(const char* args) {
     }
 }
 
-int kvs_string_set(const char* args) {
+int kvs_string_set(Context*) {
     if (1) {
         printf("success");
         return 0;

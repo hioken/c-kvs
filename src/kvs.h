@@ -2,7 +2,7 @@
 #define KVS_H   // MY_HEADER_H を定義する
 
 int setup(void);
-int kvs_string_get(const char* []);
-int kvs_string_set(const char* []);
+int kvs_string_get(Context*);
+int kvs_string_set(Context*);
 
 #endif
