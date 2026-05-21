@@ -13,7 +13,7 @@
 #endif
 
 typedef enum {
-    TYPE_STRING,
+    TYPE_STRING = 1,
     TYPE_LIST,
     TYPE_HASH
 } DataType;
@@ -31,13 +31,19 @@ struct Node {
 
 STATIC Node pool[MAX_NODES];
 STATIC Node* hash_table[TABLE_SIZE] = { NULL };
-STATIC Node* free_head = &pool[0];
+STATIC Node* free_head;
 
 STATIC uint32_t hash_fnv1a(const char*);
 STATIC Node* scan_chain(const char*);
 
 int setup(void) {
-    // poolのデフォルト値設定
+    for(int i = 0; i < MAX_NODES - 1; i++) {
+        pool[i] = (Node){0};
+        pool[i].next = &pool[i+1];
+    }
+    pool[MAX_NODES - 1] = (Node){.next = NULL};
+    free_head = &pool[0];
+
     return 0;
 }
 

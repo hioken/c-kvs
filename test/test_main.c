@@ -16,12 +16,17 @@ typedef struct {
     }
 */
 
-
 int main_loop(Context*, char[]);
 int run_all_tests(void);
 
 // ここからテスト
 int test_core_sequence(Context* ctx_p) {
+    setup();
+    assert(pool[0]->next == &pool[1]);
+    assert(pool[1]->next == &pool[2]);
+    assert(pool[MAX_NODES - 1]->next == NULL);
+    assert(free_head == &pool[0]);
+
     char test_set_1[] = "SET key1 apple";
     strncpy(ctx_p->buf, test_set_1, sizeof(test_set_1));
 
@@ -71,7 +76,7 @@ int main(void) {
 
 int run_all_tests(void) {
     Context ctx;
-    test_core_sequence(&ctx);
+    test_core_sequence(&ctx); // ここでsetup()を呼んでいる
     test_string_set_and_get(&ctx);
 
     return 0;

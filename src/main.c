@@ -3,48 +3,78 @@
 #include <kvs.h>
 
 #define DEFAULT_BUF_SIZE 1024
-#define 
+#define MAX_ARGS 32
 
 typedef struct {
     char buf[DEFAULT_BUF_SIZE];
-    char* args[32];
+    char* args[MAX_ARGS];
     char result[768];
 } Context;
 
 int input_line(Context*);
 int parse_input(Context*);
-int dispatch_cmd(Context*)
+int dispatch_cmd(Context*);
 
 #ifndef TESTMODE
 int main(void) {
-    Context ctx;
+    Context ctx = {0};
+    ctx.buf[DEFAULT_BUF_SIZE - 2] = '\x07';
+    setup();
+
     while (true) { 
-        input_line(&ctx);
+        if (input_line(&ctx)) return 0;
         parse_input(&ctx);
         dispatch_cmd(&ctx);
+        // resultを扱う処理
     }
+
     return 0;
 }
 #endif
 
 int input_line(Context* ctx_p) {
-    // 入力待ち
-    // if sizeチェック エラー
-        // buf_margin[4096]
-    // if (parse_input(入力)) return 1;
+    fgets(ctx_p->buf, sizeof(ctx_p->buf), stdin);
+    if (ctx_p->buf[DEFAULT_BUF_SIZE - 2] != '\x07') {
+        // バッファオーバーフローの例外処理
+        printf("Error: Command length limit exceeded (max: %d bytes).\n", DEFAULT_BUF_SIZE - 2);
+        return 1;
+    } else if (!(ctx_p->buf[0])) {
+        // コマンドが空の時の例外処理
+        printf("Error: Command is empty. (at input_line)\n");
+        return 1;
+    }
+    return 0;
 }
 
 int parse_input(Context* ctx_p) {
-    // char input_cmd[], char** argsを作る
+    int i = 0;
+    char* token = strtok(ctx_p->buf, " ");
+    ctx_p->args[i++] = token;
+    if (!token) {
+        // コマンドが空の時の例外処理
+        printf("Error: Command is empty. (at parse_input)\n");
+        return 1;
+    }
 
-    // エラー処理
+    // 2個めの条件は保険
+    while (token != NULL && i < MAX_ARGS + 1) {
+        token = strtok(NULL, " ");
+        args[i++] = token;
+    }
+
+    if (i > MAX_ARGS) {
+        // 動的リサイズなり、エラー処理なり
+        printf("Error: Argument count exceeds limit.\n");
+        return 1;
+    }
+
     return 0;
 }
 
 int dispatch_cmd(Context* ctx_p) {
     static const struct {
         const char *cmd;
-        int (*kvs_func)(char**);
+        int (*kvs_func)(Context*);
     } cmd_table[] = {
       {"GET", kvs_string_get},
       {"SET", kvs_string_set}
@@ -52,11 +82,18 @@ int dispatch_cmd(Context* ctx_p) {
     int table_size = sizeof(cmd_table) / sizeof(cmd_table[0]);
 
     for (int i = 0; i < table_size; i++) {
-        if (コマンド cmd_table[0]) {
+        if (strcmp(ctx_p->args[0], cmd_table[i])) {
             if ( cmd_table[1].kvs_func(ctx_p) ) return 1;
-            // resultを使う処理
             return 0;
         }
     }
+    printf("Error: Command not found.\n");
+    return 1;
+}
 
+void to_uppercase_bit(char *str) {
+    while (*str) {
+        if (*str >= 'a' && *str <= 'z') *str &= ~0x20; 
+        str++;
+    }
 }
