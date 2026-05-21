@@ -15,6 +15,7 @@ typedef struct {
 static int input_line(Context*);
 int parse_input(Context*);
 int dispatch_cmd(Context*);
+void to_uppercase_bit(char [])
 
 #ifndef TESTMODE
 int main(void) {
@@ -24,10 +25,13 @@ int main(void) {
     setup();
 
     while (true) { 
-        if (input_line(&ctx)) return 0;
+        if (input_line(&ctx) == 2) {
+            printf("Good Night\n");
+            return 0;
+        }
         parse_input(&ctx);
         dispatch_cmd(&ctx);
-        // resultを扱う処理
+        // feat: resultを扱う処理
     }
 
     return 0;
@@ -37,13 +41,19 @@ int main(void) {
 int input_line(Context* ctx_p) {
     fgets(ctx_p->buf, sizeof(ctx_p->buf), stdin);
     if (ctx_p->buf[DEFAULT_BUF_SIZE - 2] != '\x07') {
-        // バッファオーバーフローの例外処理
+        // feat: バッファオーバーフローの例外処理
         printf("Error: Command length limit exceeded (max: %d bytes).\n", DEFAULT_BUF_SIZE - 2);
         return 1;
-    } else if (!(ctx_p->buf[0])) {
-        // コマンドが空の時の例外処理
+    }
+    size_t len = strlen(ctx_p->buf);
+    if (len > 0 && ctx_p->buf[len - 1] == '\n') { ctx_p->buf[len - 1] = '\0';}
+
+    if (!(ctx_p->buf[0])) {
+        // feat: コマンドが空の時の例外処理
         printf("Error: Command is empty. (at input_line)\n");
         return 1;
+    } else if (strcmp(ctx_p->buf, "exit") == 0) {
+        return 2;
     }
     return 0;
 }
@@ -53,7 +63,7 @@ int parse_input(Context* ctx_p) {
     char* token = strtok(ctx_p->buf, " ");
     ctx_p->args[i++] = token;
     if (!token) {
-        // コマンドが空の時の例外処理
+        // feat: コマンドが空の時の例外処理
         printf("Error: Command is empty. (at parse_input)\n");
         return 1;
     }
@@ -65,7 +75,7 @@ int parse_input(Context* ctx_p) {
     }
 
     if (i > MAX_ARGS) {
-        // 動的リサイズなり、エラー処理なり
+        // feat: 動的リサイズなり、エラー処理なり
         printf("Error: Argument count exceeds limit.\n");
         return 1;
     }
@@ -82,6 +92,7 @@ int dispatch_cmd(Context* ctx_p) {
       {"SET", kvs_string_set}
     };
     int table_size = sizeof(cmd_table) / sizeof(cmd_table[0]);
+    to_uppercase_bit(args[0]);
 
     for (int i = 0; i < table_size; i++) {
         if (strcmp(ctx_p->args[0], cmd_table[i])) {
@@ -93,7 +104,7 @@ int dispatch_cmd(Context* ctx_p) {
     return 1;
 }
 
-void to_uppercase_bit(char *str) {
+void to_uppercase_bit(char str[]) {
     while (*str) {
         if (*str >= 'a' && *str <= 'z') *str &= ~0x20; 
         str++;

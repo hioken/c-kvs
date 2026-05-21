@@ -47,7 +47,7 @@ int setup(void) {
     return 0;
 }
 
-STATIC uint32_t hash_fnv1a(const char* key) {
+STATIC uint32_t hash_fnv1a(const char* key) { // 理解が薄い関数のため、メモ書きを残しておく
     uint32_t hash = 2166136261U; // FNVの32ビット用初期値
     const uint32_t fnv_prime = 16777619U; // FNVの32ビット用素数
 
@@ -88,9 +88,11 @@ int kvs_string_set(Context* ctx_p) {
         return 0;
     } else {
         Node* new_node_p = free_head;
-        free_head = new_node_p->next;
-        new_node_p->next = hash_table[idx];
         new_node_p->value = ctx_p->args[2];
+
+        free_head = new_node_p->next;
+        new_node_p->next = hash_table[idx]; //衝突時はnew_nodeをチェーンの先頭へ、非衝突時は意味ない処理
+        hash_table[idx] = new_node_p;
         return 0;
     }
 }
