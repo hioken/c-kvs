@@ -8,10 +8,11 @@
 typedef struct {
     char buf[DEFAULT_BUF_SIZE];
     char* args[MAX_ARGS];
-    char result[768];
+    char result[768]; // 200の時は結果, 400の時はエラー文
+    int status;
 } Context;
 
-int input_line(Context*);
+static int input_line(Context*);
 int parse_input(Context*);
 int dispatch_cmd(Context*);
 
@@ -19,6 +20,7 @@ int dispatch_cmd(Context*);
 int main(void) {
     Context ctx = {0};
     ctx.buf[DEFAULT_BUF_SIZE - 2] = '\x07';
+    ctx.status = 200;
     setup();
 
     while (true) { 

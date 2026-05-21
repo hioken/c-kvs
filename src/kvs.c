@@ -30,11 +30,11 @@ struct Node {
 };
 
 STATIC Node pool[MAX_NODES];
-STATIC Node* hash_table[TABLE_SIZE] = { NULL };
+static Node* hash_table[TABLE_SIZE] = { NULL };
 STATIC Node* free_head;
 
-STATIC uint32_t hash_fnv1a(const char*);
-STATIC Node* scan_chain(const char*);
+static uint32_t hash_fnv1a(const char*);
+static Node* scan_chain(const int, const char*);
 
 int setup(void) {
     for(int i = 0; i < MAX_NODES - 1; i++) {
@@ -58,33 +58,39 @@ STATIC uint32_t hash_fnv1a(const char* key) {
     return hash;
 }
 
-STATIC Node* scan_chain(const char* key) {
-    while () {
-
+STATIC Node* scan_chain(const int idx, const char* input_key) {
+    Node* node_p = hash_table[idx];
+    while (node_p != NULL && node_p->key[0] != '\0') {
+        if (strcmp(node_p->key, input_key) == 0) { return hash_table[idx]; }
+        node_p = node_p->next;
     }
-    if (1) {
-        return node_p;
-    } else {
-        return NULL;
-    }
+    return NULL;
 };
 
-int kvs_string_get(Context*) {
-    if (1) {
-        printf("value");
+int kvs_string_get(Context* ctx_p) {
+    int idx = hash_fnv1a(ctx_p->args[1]) / TABLE_SIZE;
+    Node* matched_node_p = scan_chain(idx, ctx_p->args[1])
+    if (matched_node_p*) {
+        ctx_p->result = matched_node_p->value;
+        ctx_p->status = 400;
         return 0;
     } else {
-        // 例外処理
+        snprintf(ctx_p->result, sizeof(ctx_p->result), "Undefined key: '%s'", args[1]);
         return 1;
     }
 }
 
-int kvs_string_set(Context*) {
-    if (1) {
-        printf("success");
+int kvs_string_set(Context* ctx_p) {
+    int idx = hash_fnv1a(ctx_p->args[1]) / TABLE_SIZE;
+    Node* matched_node_p = scan_chain(idx, ctx_p->args[1])
+    if (matched_node_p) {
+        strncpy(matched_node_p->value, ctx_p->args[2], sizeof(matched_node_p->value));
         return 0;
     } else {
-        // 例外処理
-        return 1;
+        Node* new_node_p = free_head;
+        free_head = new_node_p->next;
+        new_node_p->next = hash_table[idx];
+        new_node_p->value = ctx_p->args[2];
+        return 0;
     }
 }
