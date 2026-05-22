@@ -77,7 +77,7 @@ int kvs_string_get(Context* ctx_p) {
         ctx_p->status = 1;
         return 0;
     } else {
-        snprintf(ctx_p->result, sizeof(ctx_p->result), "Undefined key: '%s'", ctx_p->args[1]);
+        snprintf(ctx_p->result, sizeof(ctx_p->result), "Undefined key: %s", ctx_p->args[1]);
         ctx_p->status = 2;
         return 1;
     }

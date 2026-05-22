@@ -25,7 +25,13 @@ int main(void) {
         }
         parse_input(&ctx);
         dispatch_cmd(&ctx);
+
         // feat: resultを扱う処理
+        if (ctx.status) {
+            printf("Success\nResult: '%s'\n", ctx.result);
+        } else {
+            printf("Error\nResult: '%s'\n", ctx.result);
+        }
     }
     
 #else
@@ -36,6 +42,7 @@ int main(void) {
 }
 
 static int input_line(Context* ctx_p) {
+    printf("\nPlease enter a command: ");
     fgets(ctx_p->buf, sizeof(ctx_p->buf), stdin);
     if (ctx_p->buf[DEFAULT_BUF_SIZE - 2] != '\x07') {
         // feat: バッファオーバーフローの例外処理

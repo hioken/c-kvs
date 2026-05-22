@@ -24,7 +24,7 @@ void main_flow_for_test(Context* ctx_p, char test_cmd[]) {
 // ここからテスト
 void test_core_sequence(Context* ctx_p) {
     char test_set_1[] = "SET key1 apple";
-    strncpy(ctx_p->buf, test_set_1, sizeof(test_set_1));
+    strncpy(ctx_p->buf, test_set_1, sizeof(ctx_p->buf));
 
     parse_input(ctx_p);
     assert(strcmp(ctx_p->args[0], "SET") == 0);
@@ -58,5 +58,5 @@ void test_string_set_and_get(Context* ctx_p) {
 
     char test_get_3[] = "GET key_not_found";
     main_flow_for_test(ctx_p, test_get_3);
-    assert(strcmp(ctx_p->result, "Undefined key: 'key_not_found'") == 0);
+    assert(strcmp(ctx_p->result, "Undefined key: key_not_found") == 0);
 }
