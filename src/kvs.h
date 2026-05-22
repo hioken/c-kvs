@@ -1,7 +1,10 @@
-#ifndef KVS_H   // もし MY_HEADER_H が未定義なら（1回目の読み込みなら）
-#define KVS_H   // MY_HEADER_H を定義する
+#ifndef KVS_H
+#define KVS_H
 
-int setup(void);
+#define DEFAULT_BUF_SIZE 1024
+#define MAX_ARGS 32
+
+int node_setup(void);
 int kvs_string_get(Context*);
 int kvs_string_set(Context*);
 
