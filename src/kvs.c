@@ -23,7 +23,7 @@ struct Node {
     union {
         char string_val[VALUE_SIZE];
         Node* sub_node;
-    } value.string_val;
+    } value;
 };
 
 static Node pool[MAX_NODES];

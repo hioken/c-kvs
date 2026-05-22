@@ -1,0 +1,8 @@
+obj/
+!obj/.gitkeep
+bin/
+!bin/.gitkeep
+
+.vscode/
+.memo.md
+.memo.c
