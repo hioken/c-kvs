@@ -30,7 +30,7 @@ int main(void) {
         if (ctx.status) {
             printf("Success\nResult: '%s'\n", ctx.result);
         } else {
-            printf("Error\nResult: '%s'\n", ctx.result);
+            printf("Error: %s.\n", ctx.result);
         }
     }
     

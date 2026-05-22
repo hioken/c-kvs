@@ -84,6 +84,13 @@ int kvs_string_get(Context* ctx_p) {
 }
 
 int kvs_string_set(Context* ctx_p) {
+    if (!(ctx_p->args[2])) {
+        strcpy(ctx_p->result, "Value not provided")
+        return 1;
+    } else if (ctx_p->args[3]) {
+        strcpy(ctx_p->result, "wrong number of arguments for 'set' command")
+        return 1;
+    }
     int idx = hash_fnv1a(ctx_p->args[1]) % TABLE_SIZE;
     Node* matched_node_p = scan_chain(idx, ctx_p->args[1]);
     if (matched_node_p) {
