@@ -90,8 +90,8 @@ int kvs_string_set(Context* ctx_p) {
         strncpy(matched_node_p->value.string_val, ctx_p->args[2], sizeof(matched_node_p->value.string_val));
     } else {
         Node* new_node_p = free_head;
-        strncpy(new_node_p->key, ctx_p->args[1], sizeof(matched_node_p->key));
-        strncpy(new_node_p->value.string_val, ctx_p->args[2], sizeof(new_node_p->value.string_val));
+        strncpy(new_node_p->key, ctx_p->args[1], sizeof(new_node_p->key));
+        strncpy(new_node_p->value.string_val, ctx_p->args[2], sizeof(new_node_p->value));
         new_node_p->type = TYPE_STRING;
 
         free_head = new_node_p->next;
