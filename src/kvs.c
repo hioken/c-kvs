@@ -6,7 +6,7 @@
 
 #define MAX_NODES 1000
 #define TABLE_SIZE 1009
-#define value.string_val_SIZE 768
+#define VALUE_SIZE 768
 #define KEY_SIZE 256
 
 typedef enum {
@@ -21,7 +21,7 @@ struct Node {
     DataType type;
     Node* next;
     union {
-        char string_val[value.string_val_SIZE];
+        char string_val[VALUE_SIZE];
         Node* sub_node;
     } value.string_val;
 };
@@ -90,7 +90,7 @@ int kvs_string_set(Context* ctx_p) {
         strncpy(matched_node_p->value.string_val, ctx_p->args[2], sizeof(matched_node_p->value.string_val));
     } else {
         Node* new_node_p = free_head;
-        strncpy(matched_node_p->key, ctx_p->args[1], sizeof(matched_node_p->key));
+        strncpy(new_node_p->key, ctx_p->args[1], sizeof(matched_node_p->key));
         strncpy(new_node_p->value.string_val, ctx_p->args[2], sizeof(new_node_p->value.string_val));
         new_node_p->type = TYPE_STRING;
 

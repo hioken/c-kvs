@@ -2,17 +2,10 @@
 #include <string.h>
 #include "kvs.h"
 
-typedef struct {
-    char buf[DEFAULT_BUF_SIZE];
-    char* args[MAX_ARGS];
-    char result[768]; // 0の時はエラー, 1の時は取得結果 2の時は取得できなかった時の結果
-    int status;
-} Context;
-
 static int input_line(Context*);
 static int parse_input(Context*);
 static int dispatch_cmd(Context*);
-static void reset_context(Context*)
+static void reset_context(Context*);
 static void to_uppercase_bit(char []);
 
 #ifdef TESTMODE
@@ -36,7 +29,7 @@ int main(void) {
     }
     
 #else
-    run_all_test(&ctx);
+    run_all_tests(&ctx);
 #endif
 
     return 0;

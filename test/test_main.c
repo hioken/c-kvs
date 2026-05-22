@@ -7,8 +7,8 @@ int test_string_set_and_get(Context*);
 
 // テストを走らせる処理
 int run_all_tests(Context* ctx_p) {
-    test_core_sequence(&ctx); // ここでsetup()を呼んでいる
-    test_string_set_and_get(&ctx);
+    test_core_sequence(ctx_p);
+    test_string_set_and_get(ctx_p);
 
     printf("--All Success--\n");
     return 0;
@@ -41,25 +41,26 @@ int test_string_set_and_get(Context* ctx_p) {
     assert(strcmp(ctx_p->result, "OK") == 0);
 
     char test_get_1[] = "GET key1";
-    main_loop(ctx_p, test_get_1);
+    test_loop(ctx_p, test_get_1);
     assert(strcmp(ctx_p->result, "apple") == 0);
 
 
     char test_set_2[] = "SET key2 banana";
-    main_loop(ctx_p, test_set_2);
+    test_loop(ctx_p, test_set_2);
     assert(strcmp(ctx_p->result, "OK") == 0);
 
     char test_get_2[] = "GET key2";
-    main_loop(ctx_p, test_get_2);
+    test_loop(ctx_p, test_get_2);
     assert(strcmp(ctx_p->result, "banana") == 0);
 
 
     char test_set_3[] = "SET key2 orange";
-    main_loop(ctx_p, test_set_3);
-    main_loop(ctx_p, test_get_2);
+    test_loop(ctx_p, test_set_3);
+    test_loop(ctx_p, test_get_2);
     assert(strcmp(ctx_p->result, "orange") == 0);
 
     char test_get_3[] = "GET key_not_found";
+    test_loop(ctx_p, test_get_3);
     assert(strcmp(ctx_p->result, "Undefined key: 'key_not_found'") == 0);
 
     return 0;

@@ -1,57 +1,41 @@
 CC      := gcc
-CFLAGS  := -Wall -Wextra -O2
+CFLAGS  := -Wall -Wextra
 INCDIR  := -Isrc
 
 SRCDIR  := src
 OBJDIR  := obj
 BINDIR  := bin
-TESTDIR := test
 
-TARGET      := $(BINDIR)/kvstore
-TEST_TARGET := $(TESTDIR)/test_runner
+TARGET  := $(BINDIR)/kvstore
+SRCS    := $(wildcard $(SRCDIR)/*.c)
+OBJS    := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
 
-SRCS := $(wildcard $(SRCDIR)/*.c)
-OBJS := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
+.PHONY: all test prod release clean
 
-.PHONY: all release prod test clean
+# 引数なしのデフォルトはprodと同じ
+all: prod
 
-# デバッグモード (デフォルト)
-all: CFLAGS += -g
-all: $(TARGET)
+# パターン1: testモード (-DTESTMODE -g)
+test: CFLAGS += -DTESTMODE -g
+test: clean $(TARGET)
+	./$(TARGET)
 
-# リリース
+# パターン2: prodモード / 引数無し (-g)
+prod: CFLAGS += -g
+prod: $(TARGET)
+
+# パターン3: releaseモード (-DNDEBUG でassert無効化等)
 release: CFLAGS += -DNDEBUG
 release: $(TARGET)
 
-# 本番想定動作確認
-prod: CFLAGS += -DNDEBUG
-prod: $(TARGET)
-
-# ターゲット共通のビルドルール
 $(TARGET): $(OBJS) | $(BINDIR)
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(wildcard test/*.c) | $(OBJDIR)
 	$(CC) $(CFLAGS) $(INCDIR) -c $< -o $@
 
-$(BINDIR) $(OBJDIR) $(TESTDIR):
+$(BINDIR) $(OBJDIR):
 	mkdir -p $@
 
-# testモード (オブジェクトと実行ファイルをtestディレクトリに出力)
-TEST_OBJS      := $(patsubst $(SRCDIR)/%.c,$(TESTDIR)/%.o,$(SRCS))
-TEST_CORE_OBJS := $(filter-out $(TESTDIR)/main.o,$(TEST_OBJS))
-
-test: CFLAGS += -DTESTMODE -g
-test: $(TEST_CORE_OBJS) $(TESTDIR)/test_main.o | $(TESTDIR)
-	$(CC) $(CFLAGS) $(INCDIR) $(TESTDIR)/test_main.o $(TEST_CORE_OBJS) -o $(TEST_TARGET)
-	rm -f $(TEST_CORE_OBJS) $(TESTDIR)/test_main.o
-	./$(TEST_TARGET)
-
-$(TESTDIR)/%.o: $(SRCDIR)/%.c | $(TESTDIR)
-	$(CC) $(CFLAGS) $(INCDIR) -c $< -o $@
-
-$(TESTDIR)/test_main.o: $(TESTDIR)/test_main.c | $(TESTDIR)
-	$(CC) $(CFLAGS) $(INCDIR) -c $< -o $@
-
 clean:
-	rm -rf $(OBJDIR) $(BINDIR) $(TEST_TARGET)
+	rm -rf $(OBJDIR) $(BINDIR)
