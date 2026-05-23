@@ -74,22 +74,21 @@ static int parse_input(Context* ctx_p) {
         if (flg) {
             if (ctx->buf[i] == ' ' && i+1 < len) {
                 ctx_p->buf[i] = '\0';
-                if (ctx_p->buf[i+1] != ' ') { // 次が なら無効
-                    if (ctx_p->buf[i+1] == '"') { // 次が"だった場合の区切り処理
-                        if (ctx_p->buf[i+2] == '"') { strcpy(ctx_p->result, "Value cannot be empty"); return 1;} // ""は不可
-                        ctx_p->buf[++i] = '\0';
-                        if (add_args(ctx_p, &args_cnt, &token_p, &(ctx_p->buf[i+1]))) return 1;
-                        flg = !flg
-                    } else { // 次が"でない場合の通常区切り処理
-                        if (add_args(ctx_p, &args_cnt, &token_p, &(ctx_p->buf[i+1]))) return 1;
-                    }
+                if (ctx_p->buf[i+1] != ' ') continue;
+                if (ctx_p->buf[i+1] == '"') { // 次が"だった場合の区切り処理
+                    if (ctx_p->buf[i+2] == '"') { strcpy(ctx_p->result, "Value cannot be empty"); return 1;} // ""は不可
+                    ctx_p->buf[++i] = '\0';
+                    if (add_args(ctx_p, &args_cnt, &token_p, &(ctx_p->buf[i+1]))) return 1;
+                    flg = !flg;
+                } else { // 次が"でない場合の通常区切り処理
+                    if (add_args(ctx_p, &args_cnt, &token_p, &(ctx_p->buf[i+1]))) return 1;
                 }
             } else if (ctx_p->buf[i+1] == '"') { strcpy(ctx_p->result, "Syntax Error"); return 1; }
         } else {
             if (ctx_p->buf[i+1] == '"') {
                 if (ctx_p->buf[i+1] != ' ') { strcpy(ctx_p->result, "Syntax Error"); return 1; }
                 ctx_p->buf[i] = '\0';
-                flg = !flg
+                flg = !flg;
             }
         }
     }
