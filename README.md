@@ -138,4 +138,35 @@ valgrind --leak-check=full --track-origins=yes
 ### sysinfo.c / sysinfo.h: システム情報取得
 - OS全体のメモリ使用量を監視するためのシステム情報取得関数
 
-    
+## null文字対応時のヒント
+```c
+static int parse_input(Context* ctx_p) {
+    static char* char_null[DEFAULT_BUF_SIZE];
+    static char* char_space[DEFAULT_BUF_SIZE];
+    int null_cnt = 0;
+    int space_cnt = 0;
+    int flg = 0;
+    char* token = &(ctx_p->buf[0]);
+    int = len = strlen(ctx_p->buf);
+
+    ctx_p->args[0] = token;
+    for(int i = 1; i < len; i++) {
+        if (flg) {
+            if (ctx_p->buf[i+1] != ' ') {
+                ctx_p->buf[i] = '\0';
+                token = &(ctx_p->buf[i]);
+                flg = !flg
+            }
+        } else {
+            switch (ctx_p->buf[i]) {
+                case '\0':
+                    char_null[null_cnt] = 
+                    break;
+                case '\0':
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+```

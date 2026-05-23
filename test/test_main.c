@@ -17,8 +17,7 @@ void run_all_tests(Context* ctx_p) {
 void main_flow_for_test(Context* ctx_p, char test_cmd[]) {
     reset_context(ctx_p);
     strcpy(ctx_p->buf, test_cmd);
-    parse_input(ctx_p);
-    dispatch_cmd(ctx_p);
+    if (parse_input(ctx_p)) dispatch_cmd(ctx_p);
 }
 
 // ここからテスト
