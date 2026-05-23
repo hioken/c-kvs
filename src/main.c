@@ -72,7 +72,7 @@ static int parse_input(Context* ctx_p) {
     add_args(ctx_p, &args_cnt, &token_p, &(ctx_p->buf[0]));
     for(int i = 1; i < len; i++) {
         if (flg) {
-            if (ctx->buf[i] == ' ' && i+1 < len) {
+            if (ctx_p->buf[i] == ' ' && i+1 < len) {
                 ctx_p->buf[i] = '\0';
                 if (ctx_p->buf[i+1] != ' ') continue;
                 if (ctx_p->buf[i+1] == '"') { // 次が"だった場合の区切り処理
