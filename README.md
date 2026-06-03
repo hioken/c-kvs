@@ -42,12 +42,12 @@
 ├── obj/
 ├── src/
 │   ├── main.c
-│   ├── kvs.c 変更予定
-│   ├── kvs.h 変更予定
-│   ├── (sysinfo.c)
-│   ├── (sysinfo.h)
-│   ├── (error.c)
-│   └── (error.h)
+│   ├── kvs.c データ型追加時変更予定
+│   ├── kvs.h データ型追加時変更予定
+│   ├── sysinfo.c
+│   ├── sysinfo.h
+│   ├── error.c
+│   └── error.h
 └── test/
     └── test_main.c
 └── sundbox/   消す前提、一時的なテストファイル等
@@ -83,7 +83,7 @@ valgrind --leak-check=full --track-origins=yes
 3. ひな型を埋める・動作テスト
 
 ### 2. デバッグ、例外処理追加
-1. ディレクトリの () 部分のファイル (`error.c`, `error.h`, `sysinfo.c`, `sysinfo.h`) を作成
+1. (`error.c`, `error.h`, `sysinfo.c`, `sysinfo.h`) を作成
 2. デバッグ情報を追加
 3. 例外処理の追加
 
