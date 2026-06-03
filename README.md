@@ -16,6 +16,9 @@
 ## 使用メモリ
 - 約1Mbyte
 
+## 未対応文字
+- `'\0'`
+
 # 開発仕様
 ## 動作環境・アーキテクチャ
 - 動作形態: 単体動作（ネットワーク非依存のC言語プログラム）
@@ -52,20 +55,20 @@
 
 ## テスト・動作確認方針
 - **検証頻度**: 部品（関数・モジュール）の完成ごとに、Valgrindを用いて変数およびメモリの追跡を行いながら動作確認を実施する。
-- **テスト環境構成（オブジェクトリンク方式）**: 
-  - `test/test_main.c` を作成し、`src/kvs.h` や `src/error.h` などの必要なヘッダーのみをインクルードする。
-  - コンパイル時に `obj/kvs.o` などのオブジェクトファイルをリンクしてテストバイナリを生成する。
+- **テスト環境構成（直接インクルード方式）**: 
+  - `src/main.c` 内のコンパイルスイッチ（`#ifdef TESTMODE`）を利用して `test/test_main.c` を直接インクルードする。
+  - テストコードを製品コードの一部として一体ビルドするため、オブジェクトファイルの複雑なリンク分けを必要とせず、単一のテストバイナリ（`bin/kvstore`）として実行可能にする。
+  - Makefile側で `test/` 内の全 `.c` ファイルの変更を監視し、テストコード修正時には `src/main.c` が自動で再コンパイルされる構成とする。
 - **開発手法**: 各ファイルの関数ひな型（スケルトン）を作成した直後に `test_main.c` 側にテストロジックを記述し、半テスト駆動開発（半TDD）のサイクルで実装を進める。
-- **assertの利用制限**: `assert` によるアサーションは `test/test_main.c` 内にのみ記述し、それ以外の製品コード（`src/` 配下）では一切使用しない。
+- **assertの利用範囲**: 本プロジェクトの設計上、`src/kvs.c` の内部初期化検証など一部の不変条件チェックには `assert` を使用する。`make release` でビルドした際は `-DNDEBUG` によりこれらのアサーションは自動的に無効化される。
 
 # 開発用メモ
 ## Makefile
-| **実行コマンド** | **モード** | **追加されるマクロ** | **実行される動作** |
+| **実行コマンド** | **モード** | **追加されるマクロや引数** | **実行される動作** |
 | :--- | :--- | :--- | :--- |
-| `make test` | `test`モード | `-DNOSTATIC` | `test/test_runner` をビルド・実行し、`.o` を削除 |
-| `make` (または `make all`) | デバッグモード (デフォルト) | なし | `bin/kvstore` をビルド |
-| `make prod` | 本番想定動作確認 | `-DNDEBUG` | `bin/kvstore` をビルド |
-| `make release` | リリース | `-DNDEBUG` | `bin/kvstore` をビルド |
+| `make test` | testモード | `-DTESTMODE -g` | オブジェクトを初期化した後、テスト用バイナリをビルドして自動実行する。 |
+| `make` (または `make prod`) | prodモード (デフォルト) | `-g` | デバッグ情報を付加した通常動作版の `bin/kvstore` をビルドする。 |
+| `make release` | releaseモード | `-DNDEBUG` | `assert` を無効化した本番リリース用の `bin/kvstore` をビルドする。 |
 
 ## Valgrind
 ```bash
@@ -96,8 +99,9 @@ valgrind --leak-check=full --track-origins=yes
 
 ### 5. データ型追加
 `string` と同じフォーマットで `Hash`, `List` 追加
-1. `Hash` の `HSET`, `HGET` のテスト、実装
+1. `Hash` の `HSET`, `HGET` のテスト、実装(valueの要素数が多い場合、分割で返す仕組み)
 2. `List` の `L/RPUSH`, `LINDEX` のテスト、実装
+3. `String`のテスト
 
 ### 6. 一括機能追加
 1. `String` に `MGET`, `MSET` 追加
@@ -111,6 +115,8 @@ valgrind --leak-check=full --track-origins=yes
    - 制限到達時の挙動: 新規命令の拒否
    - 閾値（本番想定）: 全体メモリの 90%
    - 閾値（テストモード）: 全体メモリの 30%
+
+### 8. '\0'に対応
 
 ### 凍結項目
 #### 優先度1
@@ -127,21 +133,40 @@ valgrind --leak-check=full --track-origins=yes
 - **Bitmap / HyperLogLog**: ビット単位の操作や、巨大なデータの異なり数を概算する特殊なデータ構造。
 
 ## ファイルと関数
-### main.c: 入力受付とパース
-- main(): kvsのsetup()を実行後、ループ処理でinput_line()を呼び出し続ける
-- input_line(): 標準入力を受け付け、内部でparse_input()を呼び出す
-- parse_input(): 入力文字列をトークン（引数配列）に分解し、該当するkvsハンドラへ流す
-### kvs.c: KVSコア・メモリ管理・ハンドラ一括実装
-- グローバル: `static` 変数として、実データプール、ハッシュテーブル、フリーリスト先頭ポインタの実体を定義（メモリの静的確保）
-  - テスト環境用にマクロ`NOSTATIC`を使用して分岐で`static`を外す
-- setup(): 静的確保された実データプールのデフォルト値セット（フリーリストの初期の接続や初期値代入など）のみを実行
-- 各種ハンドラ: main.cから呼ばれる各コマンド（SET, GET, DEL等）の実装
-  - *ポインタ操作*: 各ハンドラ内でフリーリストやチェインのnextポインタを直接操作する
-### kvs.h: KVSの外部API定義
-- `setup()` や各種ハンドラなど、`main.c` から呼び出す関数のプロトタイプ宣言
 ### error.c / error.h: 例外処理
 - 各種例外処理関数
 ### sysinfo.c / sysinfo.h: システム情報取得
 - OS全体のメモリ使用量を監視するためのシステム情報取得関数
 
-    
+## null文字対応時のヒント
+```c
+static int parse_input(Context* ctx_p) {
+    static char* char_null[DEFAULT_BUF_SIZE];
+    static char* char_space[DEFAULT_BUF_SIZE];
+    int null_cnt = 0;
+    int space_cnt = 0;
+    int flg = 0;
+    char* token = &(ctx_p->buf[0]);
+    int = len = strlen(ctx_p->buf);
+
+    ctx_p->args[0] = token;
+    for(int i = 1; i < len; i++) {
+        if (flg) {
+            if (ctx_p->buf[i+1] != ' ') {
+                ctx_p->buf[i] = '\0';
+                token = &(ctx_p->buf[i]);
+                flg = !flg
+            }
+        } else {
+            switch (ctx_p->buf[i]) {
+                case '\0':
+                    char_null[null_cnt] = 
+                    break;
+                case '\0':
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+```

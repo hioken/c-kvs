@@ -1,39 +1,170 @@
 #include <stdio.h>
 #include <string.h>
+#include "kvs.h"
 
-int input_line(void);
-int parse_input(char*);
+typedef enum {
+    STATE_SPACE = 1,
+    STATE_IN_WORD,
+    STATE_IN_QUOTE,
+    STATE_QUOTE_END
+} ParseState;
+
+static int input_line(Context*);
+static int parse_input(Context*);
+static int dispatch_cmd(Context*);
+static void reset_context(Context*);
+static void to_uppercase_bit(char []);
+static int add_args(Context*, int*, char**, char*);
+
+#ifdef TESTMODE
+#include "../test/test_main.c"
+#endif
 
 int main(void) {
-    // kvsのsetup呼び出し
-    // ループ
-      // if (input_line()) { エラー }
+    Context ctx;
+    node_setup();
+
+#ifndef TESTMODE
+    while (1) { 
+        reset_context(&ctx);
+        if (input_line(&ctx) == 2) {
+            printf("Good Night\n");
+            return 0;
+        }
+        if (!parse_input(&ctx)) dispatch_cmd(&ctx);
+
+        // feat: resultを扱う処理
+        if (ctx.status) {
+            printf("Success\nResult: '%s'\n", ctx.result);
+        } else {
+            printf("Error: %s.\n", ctx.result);
+        }
+    }
+    
+#else
+    run_all_tests(&ctx);
+#endif
+
     return 0;
 }
 
-int input_line(void) {
-    // 入力待ち
-    // if sizeチェック エラー
-    // if (parse_input(入力)) return 1;
+static int input_line(Context* ctx_p) {
+    printf("\nPlease enter a command: ");
+    fgets(ctx_p->buf, sizeof(ctx_p->buf), stdin);
+    if (ctx_p->buf[DEFAULT_BUF_SIZE - 2] != '\x07') {
+        // feat: バッファオーバーフローの例外処理
+        printf("Error: Command length limit exceeded (max: %d bytes).\n", DEFAULT_BUF_SIZE - 2);
+        return 1;
+    }
+    size_t len = strlen(ctx_p->buf);
+    if (len > 0 && ctx_p->buf[len - 1] == '\n') { ctx_p->buf[len - 1] = '\0';}
+
+    if (!(ctx_p->buf[0])) {
+        // feat: コマンドが空の時の例外処理
+        printf("Error: Command is empty. (at input_line)\n");
+        return 1;
+    } else if (strcmp(ctx_p->buf, "exit") == 0) {
+        return 2;
+    }
+    return 0;
 }
 
-int parse_input(char* line) {
+static int parse_input(Context* ctx_p) {
+    if (!strlen(ctx_p->buf)) { strcpy(ctx_p->result, "Command is empty (at parse_input)"); return 2; } // feat: コマンドが空の時の例外処理
+    char* token_p;
+    int args_cnt = 0;
+    ParseState state = STATE_SPACE;
+    char* p = ctx_p->buf;
+
+    while(*p != '\0') {
+        switch (state) {
+            case STATE_SPACE:
+                if (*p == ' ') {
+                    *p = '\0';
+                } else if (*p == '"') {
+                    if (add_args(ctx_p, &args_cnt, &token_p, p+1)) return 1;
+                    state = STATE_IN_QUOTE; *p = '\0';
+                } else {
+                    if (add_args(ctx_p, &args_cnt, &token_p, p)) return 1;
+                    state = STATE_IN_WORD;
+                }
+                break;
+            case STATE_IN_WORD:
+                if (*p == ' ') {
+                    state = STATE_SPACE; *p = '\0';
+                } else if (*p == '"') {
+                    strcpy(ctx_p->result, "Syntax Error1");
+                    return 1;
+                } else {
+                }
+                break;
+            case STATE_IN_QUOTE:
+                if (*p == '"') {
+                    if (token_p == p) { strcpy(ctx_p->result, "Value cannot be empty"); return 1; }
+                    state = STATE_QUOTE_END; *p = '\0';
+                }
+                break;
+            case STATE_QUOTE_END:
+                if (*p == ' ') {
+                    state = STATE_SPACE; *p = '\0';
+                } else {
+                    strcpy(ctx_p->result, "Syntax Error3");
+                    return 1;
+                }
+                break;
+            default:
+                strcpy(ctx_p->result, "Application Error");
+                return 1;
+                break;
+        }
+        p++;
+    }
+    if (state == STATE_IN_QUOTE) {
+        strcpy(ctx_p->result, "Syntax Error2");
+        return 1; 
+    }
+
+    return 0;
+}
+
+
+static int dispatch_cmd(Context* ctx_p) {
     static const struct {
-        const char *command;
-        int (*kvs_func)(char**);
-    } command_table[] = {
+        const char *cmd;
+        int (*kvs_func)(Context*);
+    } cmd_table[] = {
       {"GET", kvs_string_get},
       {"SET", kvs_string_set}
     };
-    static const int table_size = sizeof(command_table) / sizeof(command_table[0]);
-    // char** argsを作る
+    int table_size = sizeof(cmd_table) / sizeof(cmd_table[0]);
+    to_uppercase_bit(ctx_p->args[0]);
 
     for (int i = 0; i < table_size; i++) {
-        if (コマンド command_table[0]) {
-            command_table[1].kvs_func(args);
+        if (strcmp(ctx_p->args[0], cmd_table[i].cmd) == 0) {
+            if ( cmd_table[i].kvs_func(ctx_p) ) return 1;
             return 0;
         }
     }
-    // エラー処理
+    printf("Error: Command not found.\n");
     return 1;
+}
+
+static void reset_context(Context* ctx_p) {
+    memset(ctx_p, 0, sizeof(Context));
+    ctx_p->buf[DEFAULT_BUF_SIZE - 2] = '\x07';
+}
+
+static void to_uppercase_bit(char str[]) {
+    while (*str) {
+        if (*str >= 'a' && *str <= 'z') *str &= ~0x20; 
+        str++;
+    }
+}
+
+static int add_args(Context* ctx_p, int* args_cnt_p, char** token_p, char* next_token) {
+    *token_p = next_token;
+    // feat: 動的リサイズなり、エラー処理なり
+    if (*args_cnt_p > MAX_ARGS) { strcpy(ctx_p->result, "Argument count exceeds limit"); return 1; }
+    ctx_p->args[(*args_cnt_p)++] = *token_p;
+    return 0;
 }

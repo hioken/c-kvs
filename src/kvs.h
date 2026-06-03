@@ -1,8 +1,18 @@
-#ifndef KVS_H   // もし MY_HEADER_H が未定義なら（1回目の読み込みなら）
-#define KVS_H   // MY_HEADER_H を定義する
+#ifndef KVS_H
+#define KVS_H
 
-int setup(void);
-int kvs_string_get(const char* []);
-int kvs_string_set(const char* []);
+#define DEFAULT_BUF_SIZE 1024
+#define MAX_ARGS 32
+
+typedef struct {
+    char buf[DEFAULT_BUF_SIZE];
+    char* args[MAX_ARGS];
+    char result[768]; // 0の時はエラー, 1の時は取得結果 2の時は取得できなかった時の結果
+    int status;
+} Context;
+
+int node_setup(void);
+int kvs_string_get(Context*);
+int kvs_string_set(Context*);
 
 #endif
