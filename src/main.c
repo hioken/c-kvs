@@ -2,6 +2,13 @@
 #include <string.h>
 #include "kvs.h"
 
+typedef enum {
+    STATE_SPACE = 1,
+    STATE_IN_WORD,
+    STATE_IN_QUOTE,
+    STATE_QUOTE_END
+} ParseState;
+
 static int input_line(Context*);
 static int parse_input(Context*);
 static int dispatch_cmd(Context*);
@@ -24,7 +31,7 @@ int main(void) {
             printf("Good Night\n");
             return 0;
         }
-        if (parse_input(&ctx)) dispatch_cmd(&ctx);
+        if (!parse_input(&ctx)) dispatch_cmd(&ctx);
 
         // feat: resultを扱う処理
         if (ctx.status) {
@@ -65,37 +72,63 @@ static int input_line(Context* ctx_p) {
 static int parse_input(Context* ctx_p) {
     size_t len = strlen(ctx_p->buf);
     if (!len) { strcpy(ctx_p->result, "Command is empty (at parse_input)"); return 1; } // feat: コマンドが空の時の例外処理
-    int flg = 0;
     char* token_p;
     int args_cnt = 0;
+    ParseState state = STATE_SPACE;
 
-    add_args(ctx_p, &args_cnt, &token_p, &(ctx_p->buf[0]));
-    for(int i = 1; i < len; i++) {
-        if (flg) {
-            if (ctx_p->buf[i] == ' ' && i+1 < len) {
-                ctx_p->buf[i] = '\0';
-                if (ctx_p->buf[i+1] != ' ') continue;
-                if (ctx_p->buf[i+1] == '"') { // 次が"だった場合の区切り処理
-                    if (ctx_p->buf[i+2] == '"') { strcpy(ctx_p->result, "Value cannot be empty"); return 1;} // ""は不可
-                    ctx_p->buf[++i] = '\0';
+    for(int i = 0; i < len; i++) {
+        switch (state) {
+            case STATE_SPACE:
+                if (ctx_p->buf[i] == ' ') {
+                    ctx_p->buf[i] = '\0';
+                    continue;
+                } else if (ctx_p->buf[i] == '"') {
                     if (add_args(ctx_p, &args_cnt, &token_p, &(ctx_p->buf[i+1]))) return 1;
-                    flg = !flg;
-                } else { // 次が"でない場合の通常区切り処理
-                    if (add_args(ctx_p, &args_cnt, &token_p, &(ctx_p->buf[i+1]))) return 1;
+                    state = STATE_IN_QUOTE; ctx_p->buf[i] = '\0';
+                } else {
+                    if (add_args(ctx_p, &args_cnt, &token_p, &(ctx_p->buf[i]))) return 1;
+                    state = STATE_IN_WORD;
                 }
-            } else if (ctx_p->buf[i+1] == '"') { strcpy(ctx_p->result, "Syntax Error"); return 1; }
-        } else {
-            if (ctx_p->buf[i+1] == '"') {
-                if (ctx_p->buf[i+1] != ' ') { strcpy(ctx_p->result, "Syntax Error"); return 1; }
-                ctx_p->buf[i] = '\0';
-                flg = !flg;
-            }
+                break;
+            case STATE_IN_WORD:
+                if (ctx_p->buf[i] == ' ') {
+                    state = STATE_SPACE; ctx_p->buf[i] = '\0';
+                } else if (ctx_p->buf[i] == '"') {
+                    strcpy(ctx_p->result, "Syntax Error1");
+                    return 1;
+                } else {
+                    continue;
+                }
+                break;
+            case STATE_IN_QUOTE:
+                if (ctx_p->buf[i] == '"') {
+                    if (token_p == &(ctx_p->buf[i])) { strcpy(ctx_p->result, "Value cannot be empty"); return 1; }
+                    state = STATE_QUOTE_END; ctx_p->buf[i] = '\0';
+                } else if (i == len - 1 || ctx_p->buf[i] == '\0') {
+                    strcpy(ctx_p->result, "Syntax Error2");
+                    return 1; 
+                } else {
+                    continue;
+                }
+                break;
+            case STATE_QUOTE_END:
+                if (ctx_p->buf[i] == ' ') {
+                    state = STATE_SPACE; ctx_p->buf[i] = '\0';
+                } else {
+                    strcpy(ctx_p->result, "Syntax Error3");
+                    return 1;
+                }
+                break;
+            default:
+                strcpy(ctx_p->result, "Application Error");
+                return 1;
+                break;
         }
     }
-    if (flg) { strcpy(ctx_p->result, "Syntax Error"); return 1; }
 
     return 0;
 }
+
 
 static int dispatch_cmd(Context* ctx_p) {
     static const struct {
@@ -134,6 +167,6 @@ static int add_args(Context* ctx_p, int* args_cnt_p, char** token_p, char* next_
     *token_p = next_token;
     // feat: 動的リサイズなり、エラー処理なり
     if (*args_cnt_p > MAX_ARGS) { strcpy(ctx_p->result, "Argument count exceeds limit"); return 1; }
-    ctx_p->args[*args_cnt_p++] = *token_p;
+    ctx_p->args[(*args_cnt_p)++] = *token_p;
     return 0;
 }
