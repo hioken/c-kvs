@@ -72,5 +72,13 @@ void test_string_set_and_get(Context* ctx_p) {
     char test_get_6[] = "GET ke\"y2\"";
     main_flow_for_test(ctx_p, test_get_6);
     assert(strcmp(ctx_p->result, "Syntax Error1") == 0);
-}
+
+    char test_get_7[] = "GET \"key2";
+    main_flow_for_test(ctx_p, test_get_7);
+    assert(strcmp(ctx_p->result, "Syntax Error2") == 0);
+
+    char test_get_8[] = "GET \"key2\"a";
+    main_flow_for_test(ctx_p, test_get_8);
+    assert(strcmp(ctx_p->result, "Syntax Error3") == 0);
     // printf("=====\nbuf: %s\nargs0: %s\nargs1: %s\nresult: %s\n=====\n", ctx_p->buf, ctx_p->args[0], ctx_p->args[1], ctx_p->result);
+}

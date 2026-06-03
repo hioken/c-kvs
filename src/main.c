@@ -70,50 +70,43 @@ static int input_line(Context* ctx_p) {
 }
 
 static int parse_input(Context* ctx_p) {
-    size_t len = strlen(ctx_p->buf);
-    if (!len) { strcpy(ctx_p->result, "Command is empty (at parse_input)"); return 1; } // feat: コマンドが空の時の例外処理
+    if (!strlen(ctx_p->buf)) { strcpy(ctx_p->result, "Command is empty (at parse_input)"); return 2; } // feat: コマンドが空の時の例外処理
     char* token_p;
     int args_cnt = 0;
     ParseState state = STATE_SPACE;
+    char* p = ctx_p->buf;
 
-    for(int i = 0; i < len; i++) {
+    while(*p != '\0') {
         switch (state) {
             case STATE_SPACE:
-                if (ctx_p->buf[i] == ' ') {
-                    ctx_p->buf[i] = '\0';
-                    continue;
-                } else if (ctx_p->buf[i] == '"') {
-                    if (add_args(ctx_p, &args_cnt, &token_p, &(ctx_p->buf[i+1]))) return 1;
-                    state = STATE_IN_QUOTE; ctx_p->buf[i] = '\0';
+                if (*p == ' ') {
+                    *p = '\0';
+                } else if (*p == '"') {
+                    if (add_args(ctx_p, &args_cnt, &token_p, p+1)) return 1;
+                    state = STATE_IN_QUOTE; *p = '\0';
                 } else {
-                    if (add_args(ctx_p, &args_cnt, &token_p, &(ctx_p->buf[i]))) return 1;
+                    if (add_args(ctx_p, &args_cnt, &token_p, p)) return 1;
                     state = STATE_IN_WORD;
                 }
                 break;
             case STATE_IN_WORD:
-                if (ctx_p->buf[i] == ' ') {
-                    state = STATE_SPACE; ctx_p->buf[i] = '\0';
-                } else if (ctx_p->buf[i] == '"') {
+                if (*p == ' ') {
+                    state = STATE_SPACE; *p = '\0';
+                } else if (*p == '"') {
                     strcpy(ctx_p->result, "Syntax Error1");
                     return 1;
                 } else {
-                    continue;
                 }
                 break;
             case STATE_IN_QUOTE:
-                if (ctx_p->buf[i] == '"') {
-                    if (token_p == &(ctx_p->buf[i])) { strcpy(ctx_p->result, "Value cannot be empty"); return 1; }
-                    state = STATE_QUOTE_END; ctx_p->buf[i] = '\0';
-                } else if (i == len - 1 || ctx_p->buf[i] == '\0') {
-                    strcpy(ctx_p->result, "Syntax Error2");
-                    return 1; 
-                } else {
-                    continue;
+                if (*p == '"') {
+                    if (token_p == p) { strcpy(ctx_p->result, "Value cannot be empty"); return 1; }
+                    state = STATE_QUOTE_END; *p = '\0';
                 }
                 break;
             case STATE_QUOTE_END:
-                if (ctx_p->buf[i] == ' ') {
-                    state = STATE_SPACE; ctx_p->buf[i] = '\0';
+                if (*p == ' ') {
+                    state = STATE_SPACE; *p = '\0';
                 } else {
                     strcpy(ctx_p->result, "Syntax Error3");
                     return 1;
@@ -124,6 +117,11 @@ static int parse_input(Context* ctx_p) {
                 return 1;
                 break;
         }
+        p++;
+    }
+    if (state == STATE_IN_QUOTE) {
+        strcpy(ctx_p->result, "Syntax Error2");
+        return 1; 
     }
 
     return 0;
