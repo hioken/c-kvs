@@ -5,7 +5,6 @@
 #include "kvs.h"
 
 int info(char* file, int line, Context* ctx_p) {
-    struct sysinfo info;
     struct rusage usage;
     printf("== info[%s:%d] ==\n", file, line);
 
