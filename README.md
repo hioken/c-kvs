@@ -44,8 +44,8 @@
 │   ├── main.c
 │   ├── kvs.c データ型追加時変更予定
 │   ├── kvs.h データ型追加時変更予定
-│   ├── sysinfo.c
-│   ├── sysinfo.h
+│   ├── info.c
+│   ├── info.h
 │   ├── error.c
 │   └── error.h
 └── test/
@@ -83,7 +83,7 @@ valgrind --leak-check=full --track-origins=yes
 3. ひな型を埋める・動作テスト
 
 ### 2. デバッグ、例外処理追加
-1. (`error.c`, `error.h`, `sysinfo.c`, `sysinfo.h`) を作成
+1. (`error.c`, `error.h`, `info.c`, `info.h`) を作成
 2. デバッグ情報を追加
 3. 例外処理の追加
 
@@ -111,7 +111,7 @@ valgrind --leak-check=full --track-origins=yes
 2. 動的リサイズのテストを作成 (`test_main.c`)
 3. デフォルトのサイズを変更、動的リサイズ実装、テスト、動作確認
 4. クラッシュ回避機構を作成
-   - 監視方法: `sysinfo` によるOS全体のメモリ使用量監視
+   - 監視方法: `info` によるOS全体のメモリ使用量監視
    - 制限到達時の挙動: 新規命令の拒否
    - 閾値（本番想定）: 全体メモリの 90%
    - 閾値（テストモード）: 全体メモリの 30%
@@ -135,7 +135,7 @@ valgrind --leak-check=full --track-origins=yes
 ## ファイルと関数
 ### error.c / error.h: 例外処理
 - 各種例外処理関数
-### sysinfo.c / sysinfo.h: システム情報取得
+### info.c / info.h: システム情報取得
 - OS全体のメモリ使用量を監視するためのシステム情報取得関数
 
 ## null文字対応時のヒント

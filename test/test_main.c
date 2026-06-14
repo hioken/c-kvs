@@ -31,6 +31,9 @@ void test_core_sequence(Context* ctx_p) {
     assert(strcmp(ctx_p->args[0], "SET") == 0);
     assert(strcmp(ctx_p->args[1], "key1") == 0);
     assert(strcmp(ctx_p->args[2], "apple") == 0);
+
+    assert(info(__FILE__, __LINE__, NULL) == 0);
+    assert(info(__FILE__, __LINE__, ctx_p) == 0);
 }
 
 void test_string_set_and_get(Context* ctx_p) {
